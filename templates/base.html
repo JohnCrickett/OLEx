@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>{{ title }}</title>
+        <link rel="stylesheet" href="{{ static_url("app.css") }}" type="text/css">
+        {% block head %}{% end %}
+    </head>
+    <body>
+         <div id="content">
+             {% block body %}{% end %}
+         </div>
+    </body>
+</html>
