@@ -1,5 +1,5 @@
 from collections import defaultdict
-#import MySQLdb
+#import MySQLdb # this is not available on windows for anaconda and python 3.4
 from bs4 import BeautifulSoup
 import operator
 import os
