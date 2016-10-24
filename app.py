@@ -1,23 +1,51 @@
+from collections import defaultdict
 #import MySQLdb
+from bs4 import BeautifulSoup
+import operator
 import os
+from tornado.httpclient import AsyncHTTPClient
 import tornado.ioloop
 import tornado.web
 from tornado.options import define, options
 
 define("port", default=8888, help="run on the given port", type=int)
-# define("mysql_host", default="127.0.0.1:3306", help="blog database host")
-# define("mysql_database", default="app", help="app database name")
-# define("mysql_user", default="app", help="app database user")
-# define("mysql_password", default="apppws", help="app database password")
 
 
 class MainHandler(tornado.web.RequestHandler):
     def get(self):
         self.render("templates/form.html", title="OLEx App")
 
-
+    @tornado.web.asynchronous
     def post(self):
         self.write("Your URL is: " + self.get_argument('url', ''))
+        http_client = AsyncHTTPClient()
+        http_client.fetch(self.get_argument('url', ''),
+                          callback=self.on_fetch)
+
+
+    def on_fetch(self, response):
+        if response.error:
+            print("Error:", response.error)
+            self.render("templates/error.html", title="OLEx App", message = response.error)
+        else:
+            soup = BeautifulSoup(response.body)
+            for script in soup(["script", "style"]):
+                script.extract()
+            wordmap = self.generate_wordmap(soup.get_text())
+            top100 = sorted(wordmap.items(), key=operator.itemgetter(1), reverse=True)[:100]
+
+            self.render("templates/result.html", title="OLEx App", content = top100)
+
+
+    def generate_wordmap(self, text):
+        words = text.split()
+        counts = defaultdict(int)
+        for word in words:
+            counts[word] += 1
+        return counts
+
+
+
 
 
 def make_app():
