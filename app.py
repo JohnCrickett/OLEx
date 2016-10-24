@@ -1,6 +1,6 @@
 from collections import defaultdict
-#import MySQLdb
-from bs4 import BeautifulSoup
+#import MySQLdb not available for python 3 in anaconda
+import lxml.html
 import operator
 import os
 from tornado.httpclient import AsyncHTTPClient
@@ -28,10 +28,8 @@ class MainHandler(tornado.web.RequestHandler):
             print("Error:", response.error)
             self.render("templates/error.html", title="OLEx App", message = response.error)
         else:
-            soup = BeautifulSoup(response.body)
-            for script in soup(["script", "style"]):
-                script.extract()
-            wordmap = self.generate_wordmap(soup.get_text())
+            document = lxml.html.document_fromstring(response.body)
+            wordmap = self.generate_wordmap(document.text_content())
             top100 = sorted(wordmap.items(), key=operator.itemgetter(1), reverse=True)[:100]
 
             self.render("templates/result.html", title="OLEx App", content = top100)
