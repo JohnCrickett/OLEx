@@ -4,6 +4,10 @@ vm: true
 runtime_config:
   python_version: 3
 
+libraries:
+  - name: tornado
+    version: "latest"
+
 handlers:
 - url: /.*
   script: app.py
